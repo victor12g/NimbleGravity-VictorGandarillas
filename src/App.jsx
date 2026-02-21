@@ -1,9 +1,12 @@
 import { useMemo, useState } from 'react';
-import JobCard from './components/JobCard.jsx';
+import CandidateSection from './components/CandidateSection.jsx';
+import JobsSection from './components/JobsSection.jsx';
+import ApplyModal from './components/ApplyModal.jsx';
 import {
   applyToJob,
   getCandidateByEmail,
   getJobs,
+  isValidEmail,
   isValidGithubRepoUrl,
 } from './services/api.js';
 
@@ -12,43 +15,59 @@ function App() {
   const [candidate, setCandidate] = useState(null);
   const [jobs, setJobs] = useState([]);
   const [repoByJob, setRepoByJob] = useState({});
+  const [selectedJobId, setSelectedJobId] = useState(null);
 
   const [isLoadingCandidate, setIsLoadingCandidate] = useState(false);
   const [isLoadingJobs, setIsLoadingJobs] = useState(false);
   const [formError, setFormError] = useState('');
+  const [jobsError, setJobsError] = useState('');
 
   const [submitStateByJob, setSubmitStateByJob] = useState({});
 
   const canSubmitAny = useMemo(() => candidate && jobs.length > 0, [candidate, jobs]);
+  const selectedJob = useMemo(
+    () => jobs.find((job) => job.id === selectedJobId) || null,
+    [jobs, selectedJobId]
+  );
 
-  const handleLoadData = async () => {
+  const handleLoadCandidate = async () => {
     const normalizedEmail = email.trim();
 
     if (!normalizedEmail) {
-      setFormError('Ingresá tu email para cargar tus datos de candidato.');
+      setFormError('Please enter your email to load your candidate data.');
+      return;
+    }
+
+    if (!isValidEmail(normalizedEmail)) {
+      setFormError('Please enter a valid email address (e.g. name@domain.com).');
       return;
     }
 
     setFormError('');
     setIsLoadingCandidate(true);
-    setIsLoadingJobs(true);
 
     try {
-      const [candidateResponse, jobsResponse] = await Promise.all([
-        getCandidateByEmail(normalizedEmail),
-        getJobs(),
-      ]);
-
+      const candidateResponse = await getCandidateByEmail(normalizedEmail);
       setCandidate(candidateResponse);
-      setJobs(jobsResponse);
       setSubmitStateByJob({});
+
+      setJobsError('');
+      setIsLoadingJobs(true);
+      try {
+        const jobsResponse = await getJobs();
+        setJobs(jobsResponse);
+        setSelectedJobId(null);
+      } catch (error) {
+        setJobs([]);
+        setJobsError(error.message || 'Failed to load open positions.');
+      } finally {
+        setIsLoadingJobs(false);
+      }
     } catch (error) {
       setCandidate(null);
-      setJobs([]);
-      setFormError(error.message || 'No se pudieron cargar los datos.');
+      setFormError(error.message || 'Failed to load candidate data.');
     } finally {
       setIsLoadingCandidate(false);
-      setIsLoadingJobs(false);
     }
   };
 
@@ -70,7 +89,7 @@ function App() {
 
   const handleSubmit = async (jobId) => {
     if (!candidate) {
-      setFormError('Primero cargá los datos del candidato con tu email.');
+      setFormError('Please load your candidate data first.');
       return;
     }
 
@@ -80,7 +99,7 @@ function App() {
         ...previous,
         [jobId]: {
           loading: false,
-          error: 'Ingresá una URL válida de GitHub (https://github.com/usuario/repo).',
+          error: 'Please enter a valid GitHub repository URL (https://github.com/username/repo).',
           success: '',
         },
       }));
@@ -109,7 +128,7 @@ function App() {
         [jobId]: {
           loading: false,
           error: '',
-          success: 'Postulación enviada correctamente.',
+          success: 'Application submitted successfully.',
         },
       }));
     } catch (error) {
@@ -117,7 +136,7 @@ function App() {
         ...previous,
         [jobId]: {
           loading: false,
-          error: error.message || 'No se pudo enviar la postulación.',
+          error: error.message || 'Failed to submit your application.',
           success: '',
         },
       }));
@@ -128,69 +147,36 @@ function App() {
     <main className="container">
       <h1>Nimble Gravity Challenge</h1>
 
-      <section className="panel">
-        <h2>Step 2 + Step 3</h2>
-        <p className="muted">Cargá tus datos de candidato y las posiciones abiertas.</p>
+      <CandidateSection
+        email={email}
+        onEmailChange={setEmail}
+        onLoad={handleLoadCandidate}
+        isLoading={isLoadingCandidate}
+        candidate={candidate}
+        error={formError}
+      />
 
-        <div className="row">
-          <input
-            className="input"
-            type="email"
-            placeholder="tu.email@ejemplo.com"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-          />
-          <button
-            className="button"
-            onClick={handleLoadData}
-            disabled={isLoadingCandidate || isLoadingJobs}
-          >
-            {isLoadingCandidate || isLoadingJobs ? 'Cargando...' : 'Cargar datos'}
-          </button>
-        </div>
+      <JobsSection
+        candidate={candidate}
+        jobs={jobs}
+        isLoading={isLoadingJobs}
+        error={jobsError}
+        selectedJobId={selectedJobId}
+        onSelect={setSelectedJobId}
+        submitStateByJob={submitStateByJob}
+      />
 
-        {formError ? <p className="message error">{formError}</p> : null}
-
-        {candidate ? (
-          <div className="candidate-box">
-            <p>
-              <strong>Candidato:</strong> {candidate.firstName} {candidate.lastName}
-            </p>
-            <p>
-              <strong>Email:</strong> {candidate.email}
-            </p>
-            <p>
-              <strong>uuid:</strong> {candidate.uuid}
-            </p>
-            <p>
-              <strong>candidateId:</strong> {candidate.candidateId}
-            </p>
-          </div>
-        ) : null}
-      </section>
-
-      <section className="panel">
-        <h2>Step 4 + Step 5</h2>
-        <p className="muted">Listado de posiciones con submit por posición.</p>
-
-        {!jobs.length && !isLoadingJobs ? (
-          <p className="message">Todavía no hay posiciones cargadas.</p>
-        ) : null}
-
-        <div className="jobs-grid">
-          {jobs.map((job) => (
-            <JobCard
-              key={job.id}
-              job={job}
-              repoUrl={repoByJob[job.id] || ''}
-              onRepoChange={(value) => handleRepoChange(job.id, value)}
-              onSubmit={() => handleSubmit(job.id)}
-              disabled={!canSubmitAny}
-              submitState={submitStateByJob[job.id]}
-            />
-          ))}
-        </div>
-      </section>
+      {selectedJob ? (
+        <ApplyModal
+          job={selectedJob}
+          repoUrl={repoByJob[selectedJob.id] || ''}
+          onRepoChange={(value) => handleRepoChange(selectedJob.id, value)}
+          onSubmit={() => handleSubmit(selectedJob.id)}
+          onClose={() => setSelectedJobId(null)}
+          submitState={submitStateByJob[selectedJob.id]}
+          canSubmit={canSubmitAny}
+        />
+      ) : null}
     </main>
   );
 }

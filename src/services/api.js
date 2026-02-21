@@ -6,18 +6,21 @@ if (!BASE_URL) {
 }
 
 const GITHUB_REPO_REGEX = /^https:\/\/github\.com\/[\w.-]+\/[\w.-]+\/?$/i;
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 function debugLog(type, payload) {
   if (!DEBUG_API) {
     return;
   }
 
+  const serialized = JSON.stringify(payload, null, 2);
+
   if (type === 'ERROR') {
-    console.error(`[API ${type}]`, payload);
+    console.error(`[API ${type}]\n${serialized}`);
     return;
   }
 
-  console.info(`[API ${type}]`, payload);
+  console.info(`[API ${type}]\n${serialized}`);
 }
 
 async function request(path, options = {}) {
@@ -97,4 +100,8 @@ export function applyToJob(payload) {
 
 export function isValidGithubRepoUrl(url) {
   return GITHUB_REPO_REGEX.test(url);
+}
+
+export function isValidEmail(email) {
+  return EMAIL_REGEX.test(email);
 }
