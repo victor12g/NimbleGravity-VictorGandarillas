@@ -1,20 +1,32 @@
 # NimbleGravity-VictorGandarillas
 
-Repositorio inicial para el challenge de Nimble Gravity.
+Challenge técnico de Nimble Gravity implementado con React + Vite.
 
 ## Estado actual
 
-- Setup base de React + Vite
-- Estructura mínima de aplicación
-- Sin implementación de los pasos del challenge todavía
+- Step 2: obtención de candidato por email
+- Step 3: obtención de lista de posiciones
+- Step 4: listado de posiciones con input de repo URL y botón submit por posición
+- Step 5: envío de postulación con manejo de estados de carga y error
 
 ## Cómo ejecutar
 
 ```bash
+cp .env.example .env
 npm install
 npm run dev
 ```
 
-## Próximo paso
+## Flujo de uso
 
-Implementar los pasos del challenge (consumo de API, listado de posiciones y submit por posición).
+1. Ingresar email y presionar **Cargar datos**.
+2. Verificar que aparezcan datos del candidato y posiciones.
+3. Completar URL del repositorio GitHub en la posición elegida.
+4. Presionar **Submit** para enviar postulación.
+
+## Configuración de entorno
+
+La aplicación usa estas variables en `.env`:
+
+- `BASE_URL`: URL base de la API.
+- `DEBUG_API`: `true` o `false` para activar/desactivar logs de requests y responses en consola del navegador.
