@@ -21,13 +21,13 @@ function JobCard({
         }
       }}
     >
-      <h3 className="job-title" title={job.title}>
-        {job.title}
+      <h3 className="job-title" title={job.title} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <span>{job.title}</span>
+        {submitState?.success && <span title="Applied successfully" style={{ color: '#22c55e', fontWeight: 'bold', fontSize: '1.2em' }}>✓</span>}
       </h3>
       <p className="job-id">ID: {job.id}</p>
 
       {submitState?.error ? <p className="message error">{submitState.error}</p> : null}
-      {submitState?.success ? <p className="message success">{submitState.success}</p> : null}
     </article>
   );
 }
