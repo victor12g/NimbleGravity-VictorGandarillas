@@ -45,3 +45,9 @@ src/
 │   └── api.js                 # API calls and validation helpers
 └── styles.css
 ```
+
+## Validations
+
+- **Email**: format is validated client-side before calling the API
+- **GitHub URL**: must match `https://github.com/username/repo` pattern before submitting
+- Both fields also trigger on `Enter` key in addition to button click
