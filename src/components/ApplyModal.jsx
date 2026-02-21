@@ -48,7 +48,9 @@ function ApplyModal({ job, repoUrl, onRepoChange, onSubmit, onClose, submitState
                         <p className="message error">{submitState.error}</p>
                     ) : null}
                     {submitState?.success ? (
-                        <p className="message success">{submitState.success}</p>
+                        <p className="message success" style={{ marginTop: '10px' }}>
+                            {submitState.success}
+                        </p>
                     ) : null}
                 </div>
             </div>
