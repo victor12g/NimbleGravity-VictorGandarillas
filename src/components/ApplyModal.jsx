@@ -33,14 +33,15 @@ function ApplyModal({ job, repoUrl, onRepoChange, onSubmit, onClose, submitState
                         value={repoUrl}
                         aria-label="GitHub repository URL"
                         onChange={(event) => onRepoChange(event.target.value)}
+                        onKeyDown={(event) => { if (event.key === 'Enter') onSubmit(); }}
                     />
 
                     <button
                         className="button"
                         onClick={onSubmit}
-                        disabled={!canSubmit || submitState?.loading}
+                        disabled={!canSubmit || submitState?.loading || !!submitState?.success}
                     >
-                        {submitState?.loading ? 'Submitting...' : 'Submit'}
+                        {submitState?.loading ? 'Submitting...' : submitState?.success ? 'Applied ✓' : 'Submit'}
                     </button>
 
                     {submitState?.error ? (

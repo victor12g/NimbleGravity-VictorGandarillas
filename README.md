@@ -1,15 +1,13 @@
-# NimbleGravity-VictorGandarillas
+# Nimble Gravity Challenge — Victor Gandarillas
 
-Challenge técnico de Nimble Gravity implementado con React + Vite.
+A React mini-app that connects to the Nimble Gravity candidate API, allowing a candidate to load their profile, browse open positions, and submit an application with a GitHub repository URL.
 
-## Estado actual
+## Tech stack
 
-- Step 2: obtención de candidato por email
-- Step 3: obtención de lista de posiciones
-- Step 4: listado de posiciones con input de repo URL y botón submit por posición
-- Step 5: envío de postulación con manejo de estados de carga y error
+- **React 18** + **Vite 5**
+- Vanilla CSS (no UI libraries)
 
-## Cómo ejecutar
+## Getting started
 
 ```bash
 cp .env.example .env
@@ -17,16 +15,33 @@ npm install
 npm run dev
 ```
 
-## Flujo de uso
+Open [http://localhost:5173](http://localhost:5173) in your browser.
 
-1. Ingresar email y presionar **Cargar datos**.
-2. Verificar que aparezcan datos del candidato y posiciones.
-3. Completar URL del repositorio GitHub en la posición elegida.
-4. Presionar **Submit** para enviar postulación.
+## Environment variables
 
-## Configuración de entorno
+| Variable    | Description                                          | Default |
+|-------------|------------------------------------------------------|---------|
+| `BASE_URL`  | API base URL                                         | —       |
+| `DEBUG_API` | Set to `true` to log all API requests and responses to the browser console | `false` |
 
-La aplicación usa estas variables en `.env`:
+## How it works
 
-- `BASE_URL`: URL base de la API.
-- `DEBUG_API`: `true` o `false` para activar/desactivar logs de requests y responses en consola del navegador.
+1. **Enter your email** and click **Load candidate** — fetches candidate data from the API.
+2. **Browse open positions** — loaded automatically after candidate data is confirmed.
+3. **Click a position** — opens a modal with a GitHub repository URL input.
+4. **Submit your application** — sends a `POST` request with your candidate details and repo URL.
+
+## Project structure
+
+```
+src/
+├── App.jsx                    # State management and handlers
+├── components/
+│   ├── CandidateSection.jsx   # Email input and candidate info
+│   ├── JobsSection.jsx        # Job listing grid
+│   ├── ApplyModal.jsx         # Application modal with repo input
+│   └── JobCard.jsx            # Individual job card
+├── services/
+│   └── api.js                 # API calls and validation helpers
+└── styles.css
+```

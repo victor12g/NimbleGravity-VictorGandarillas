@@ -21,6 +21,7 @@ function CandidateSection({ email, onEmailChange, onLoad, isLoading, candidate, 
                     value={email}
                     aria-label="Candidate email"
                     onChange={(event) => onEmailChange(event.target.value)}
+                    onKeyDown={(event) => { if (event.key === 'Enter') onLoad(); }}
                 />
                 <button className="button" onClick={onLoad} disabled={isLoading}>
                     {isLoading ? 'Loading...' : 'Load candidate'}
